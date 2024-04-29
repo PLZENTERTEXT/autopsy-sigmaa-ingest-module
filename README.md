@@ -24,11 +24,13 @@
 #### Sigma Rules for EVTX Logs : 
 
 Users can import rule files in `.yml` format or its `.json` equivalent into the `EvtxRule` folder
+> Do note that if `.json` files are used, only 1 `.json` file is accepted as input and it is prioritized from other `.yml` rules
 
 
 #### Auditd for Linux Logs : 
 
 Users can import rule files in `.yml` format or its `.json` equivalent into the `AuditdRule` folder
+> Do note that if `.json` files are used, only 1 `.json` file is accepted as input and it is prioritized from other `.yml` rules
 
 
 #### JSON Rule Format Generation : 
