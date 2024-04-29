@@ -621,6 +621,20 @@ class SIGMAAAnalysisIngestModule(DataSourceIngestModule):
         # json file is saved to the temp directory
         progressBar.progress(3)
         
+        # If there is a .json rule file, prioritize it and adjust self.path to point to it
+        evtx_rulefilelist = os.listdir(self.path_to_evtx_rulefile)
+        # Filter the list to get only files ending with ".json"
+        evtx_json_files = [file for file in evtx_rulefilelist if file.endswith(".json")]
+        if len(evtx_json_files) > 0:
+            self.path_to_evtx_rulefile = os.path.join(self.path_to_evtx_rulefile, evtx_json_files[0])
+
+        auditd_rulefilelist = os.listdir(self.path_to_auditd_rulefile)
+        # Filter the list to get only files ending with ".json"
+        auditd_json_files = [file for file in auditd_rulefilelist if file.endswith(".json")]
+        if len(auditd_json_files) > 0:
+            self.path_to_auditd_rulefile = os.path.join(self.path_to_auditd_rulefile, auditd_json_files[0])
+
+
         # If xxx_results.csv already exists:
         # - Delete it first
         # - Make sure deletion is complete to prevent race condition
