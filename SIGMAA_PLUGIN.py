@@ -684,25 +684,31 @@ class SIGMAAAnalysisIngestModule(DataSourceIngestModule):
         auditd_delete_thread.start()
 
         # Start the command execution threads
-        evtx_execute_thread.start()
-        auditd_execute_thread.start()
+        if evtx_fileCount != 0:
+            evtx_execute_thread.start()
+        if auditd_fileCount != 0:
+            auditd_execute_thread.start()
 
         # Wait for all threads to complete
         evtx_delete_thread.join()
         auditd_delete_thread.join()
-        evtx_execute_thread.join()
-        auditd_execute_thread.join() 
+        if evtx_fileCount != 0:
+            evtx_execute_thread.join()
+        if auditd_fileCount != 0:
+            auditd_execute_thread.join() 
 
         # Wait for the csv file to be written
-        while "evtx_results.csv" not in os.listdir(temp_evtx_dir):
-            self.log(Level.INFO, "Waiting for the Evtx CSV file to be written")
-            # Check if the user pressed cancel 
-            if self.context.isJobCancelled(): return IngestModule.ProcessResult.OK
+        if evtx_fileCount != 0:
+            while "evtx_results.csv" not in os.listdir(temp_evtx_dir):
+                # self.log(Level.INFO, "Waiting for the Evtx CSV file to be written")
+                # Check if the user pressed cancel 
+                if self.context.isJobCancelled(): return IngestModule.ProcessResult.OK
         
-        while "auditd_results.csv" not in os.listdir(temp_auditd_dir):
-            self.log(Level.INFO, "Waiting for the Auditd CSV file to be written")
-            # Check if the user pressed cancel 
-            if self.context.isJobCancelled(): return IngestModule.ProcessResult.OK
+        if auditd_fileCount != 0:
+            while "auditd_results.csv" not in os.listdir(temp_auditd_dir):
+                self.log(Level.INFO, "Waiting for the Auditd CSV file to be written")
+                # Check if the user pressed cancel 
+                if self.context.isJobCancelled(): return IngestModule.ProcessResult.OK
         
 
         # Check if there is any result of the IOC by checking if xxx_results.csv is empty
@@ -718,8 +724,14 @@ class SIGMAAAnalysisIngestModule(DataSourceIngestModule):
         evtx_csv_path = os.path.join(temp_evtx_dir, "evtx_results.csv")
         auditd_csv_path = os.path.join(temp_auditd_dir, "auditd_results.csv")
 
-        evtx_empty = check_if_file_empty(evtx_csv_path)
-        auditd_empty = check_if_file_empty(auditd_csv_path)
+        # Set default, either might return false
+        evtx_empty = True
+        auditd_empty = True
+
+        if evtx_fileCount != 0:
+            evtx_empty = check_if_file_empty(evtx_csv_path)
+        if auditd_fileCount != 0:
+            auditd_empty = check_if_file_empty(auditd_csv_path)
 
         if ((evtx_empty == True) and (auditd_empty == True)):
             message = IngestMessage.createMessage(IngestMessage.MessageType.DATA, "SIGMAA", "No IOCs are found")
